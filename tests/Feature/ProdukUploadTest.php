@@ -13,21 +13,6 @@ class ProdukUploadTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function tearDown(): void
-    {
-        // Bersihkan file uji coba di public/images/produk
-        $testFiles = glob(public_path('images/produk/*_test_*.jpg'));
-        if ($testFiles) {
-            foreach ($testFiles as $file) {
-                if (file_exists($file)) {
-                    @unlink($file);
-                }
-            }
-        }
-
-        parent::tearDown();
-    }
-
     public function test_admin_can_upload_product_with_image(): void
     {
         $admin = User::factory()->create([
@@ -60,12 +45,9 @@ class ProdukUploadTest extends TestCase
 
         $produk = Produk::first();
         $this->assertNotNull($produk->gambar);
-        $this->assertFileExists(public_path('images/produk/'.$produk->gambar));
-
-        // Hapus file yang terupload
-        if (file_exists(public_path('images/produk/'.$produk->gambar))) {
-            @unlink(public_path('images/produk/'.$produk->gambar));
-        }
+        $this->assertStringStartsWith('data:image/', $produk->gambar);
+        $this->assertStringContainsString(';base64,', $produk->gambar);
+        $this->assertEquals($produk->gambar, $produk->gambar_url);
     }
 
     public function test_admin_can_update_product_image(): void
@@ -78,23 +60,15 @@ class ProdukUploadTest extends TestCase
             'nama_kategori' => 'Makanan',
         ]);
 
-        // Buat file lama di public/images/produk
-        $oldFileName = time().'_test_old.jpg';
-        $destination = public_path('images/produk');
-        if (! file_exists($destination)) {
-            mkdir($destination, 0755, true);
-        }
-        file_put_contents($destination.'/'.$oldFileName, 'old content');
+        $oldBase64 = 'data:image/jpeg;base64,'.base64_encode('old content');
 
         $produk = Produk::create([
             'nama_produk' => 'Roti Bakar',
             'harga' => 12000,
             'stok' => 10,
             'kategori_id' => $kategori->id,
-            'gambar' => $oldFileName,
+            'gambar' => $oldBase64,
         ]);
-
-        $this->assertFileExists($destination.'/'.$oldFileName);
 
         $newFile = UploadedFile::fake()->image('test_new.jpg');
 
@@ -109,17 +83,12 @@ class ProdukUploadTest extends TestCase
         $response->assertRedirect(route('admin.produk.index'));
         $produk->refresh();
 
-        $this->assertNotEquals($oldFileName, $produk->gambar);
-        $this->assertFileExists(public_path('images/produk/'.$produk->gambar));
-        $this->assertFileDoesNotExist($destination.'/'.$oldFileName);
-
-        // Hapus file yang terupload
-        if (file_exists(public_path('images/produk/'.$produk->gambar))) {
-            @unlink(public_path('images/produk/'.$produk->gambar));
-        }
+        $this->assertNotEquals($oldBase64, $produk->gambar);
+        $this->assertStringStartsWith('data:image/', $produk->gambar);
+        $this->assertStringContainsString(';base64,', $produk->gambar);
     }
 
-    public function test_admin_can_delete_product_and_its_image(): void
+    public function test_admin_can_delete_product(): void
     {
         $admin = User::factory()->create([
             'role' => 'admin',
@@ -129,27 +98,17 @@ class ProdukUploadTest extends TestCase
             'nama_kategori' => 'Snack',
         ]);
 
-        $fileName = time().'_test_delete.jpg';
-        $destination = public_path('images/produk');
-        if (! file_exists($destination)) {
-            mkdir($destination, 0755, true);
-        }
-        file_put_contents($destination.'/'.$fileName, 'delete content');
-
         $produk = Produk::create([
             'nama_produk' => 'Keripik Singkong',
             'harga' => 10000,
             'stok' => 5,
             'kategori_id' => $kategori->id,
-            'gambar' => $fileName,
+            'gambar' => 'data:image/jpeg;base64,'.base64_encode('sample content'),
         ]);
-
-        $this->assertFileExists($destination.'/'.$fileName);
 
         $response = $this->actingAs($admin)->delete(route('admin.produk.destroy', $produk->id));
 
         $response->assertRedirect(route('admin.produk.index'));
         $this->assertDatabaseMissing('tb_produk', ['id' => $produk->id]);
-        $this->assertFileDoesNotExist($destination.'/'.$fileName);
     }
 }

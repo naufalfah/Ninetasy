@@ -16,6 +16,19 @@ class Produk extends Model
         'gambar',
     ];
 
+    public function getGambarUrlAttribute(): ?string
+    {
+        if (! $this->gambar) {
+            return null;
+        }
+
+        if (str_starts_with($this->gambar, 'data:') || str_starts_with($this->gambar, 'http://') || str_starts_with($this->gambar, 'https://')) {
+            return $this->gambar;
+        }
+
+        return asset('images/produk/'.$this->gambar);
+    }
+
     public function detailTransaksi()
     {
         return $this->hasMany(DetailTransaksi::class, 'produk_id');

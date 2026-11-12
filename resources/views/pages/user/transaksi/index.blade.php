@@ -66,7 +66,7 @@
                                                         @endif
                                                     @endif
                                                 </div>
-                                                <img src="{{ asset('images/produk/' . $item->gambar) }}" class="object-cover aspect-3/2" alt="Gambar_{{ $item->nama_produk }}">
+                                                <img src="{{ $item->gambar_url }}" class="object-cover aspect-3/2" alt="Gambar_{{ $item->nama_produk }}">
                                             </div>
                                             <div class="flex justify-between items-center">
                                                 <h1 class="text-lg my-3 font-semibold">{{ $item->nama_produk }}</h1>
@@ -100,7 +100,7 @@
                             <div class="flex items-center gap-3 py-4">
                                 <div class="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-stone-100">
                                     @if (!empty($item['gambar']))
-                                        <img src="{{ asset('images/produk/' . $item['gambar']) }}" class="h-full w-full object-cover" alt="{{ $item['nama_produk'] }}">
+                                        <img src="{{ str_starts_with($item['gambar'], 'data:') || str_starts_with($item['gambar'], 'http') ? $item['gambar'] : asset('images/produk/' . $item['gambar']) }}" class="h-full w-full object-cover" alt="{{ $item['nama_produk'] }}">
                                     @else
                                         <div class="flex h-full items-center justify-center text-[10px] text-gray-400">Produk</div>
                                     @endif

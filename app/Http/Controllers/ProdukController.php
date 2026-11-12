@@ -39,15 +39,9 @@ class ProdukController extends Controller
 
         if ($request->hasFile('produk_gambar')) {
             $file = $request->file('produk_gambar');
-            $fileName = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
-            $destinationPath = public_path('images/produk');
-
-            if (! file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-
-            $file->move($destinationPath, $fileName);
-            $produk['gambar'] = $fileName;
+            $imageData = base64_encode(file_get_contents($file->getRealPath()));
+            $mimeType = $file->getMimeType();
+            $produk['gambar'] = 'data:'.$mimeType.';base64,'.$imageData;
         }
 
         unset($produk['produk_gambar']);
@@ -86,23 +80,9 @@ class ProdukController extends Controller
 
         if ($request->hasFile('produk_gambar')) {
             $file = $request->file('produk_gambar');
-            $fileName = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
-            $destinationPath = public_path('images/produk');
-
-            if (! file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-
-            $file->move($destinationPath, $fileName);
-            $produkData['gambar'] = $fileName;
-
-            // Hapus file gambar lama dari public/images/produk jika ada
-            if ($produk->gambar) {
-                $oldPath = public_path('images/produk/'.$produk->gambar);
-                if (file_exists($oldPath)) {
-                    @unlink($oldPath);
-                }
-            }
+            $imageData = base64_encode(file_get_contents($file->getRealPath()));
+            $mimeType = $file->getMimeType();
+            $produkData['gambar'] = 'data:'.$mimeType.';base64,'.$imageData;
         }
 
         unset($produkData['produk_gambar']);
@@ -120,13 +100,6 @@ class ProdukController extends Controller
         $produk = Produk::find($id);
 
         if ($produk) {
-            if ($produk->gambar) {
-                $filePath = public_path('images/produk/'.$produk->gambar);
-                if (file_exists($filePath)) {
-                    @unlink($filePath);
-                }
-            }
-
             $produk->delete();
         }
 

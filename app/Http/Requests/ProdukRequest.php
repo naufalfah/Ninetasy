@@ -27,7 +27,7 @@ class ProdukRequest extends FormRequest
             'harga' => 'required|integer|min:0',
             'stok' => 'required|integer|min:0',
             'kategori_id' => 'required|exists:tb_kategori,id',
-            'produk_gambar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:4096',
+            'produk_gambar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ];
     }
 }
