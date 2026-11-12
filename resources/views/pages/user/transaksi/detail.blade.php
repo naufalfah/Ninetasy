@@ -57,7 +57,7 @@
                             <div class="flex min-w-0 items-center gap-3 sm:gap-4">
                                 <div class="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-[#e8e4d8] shadow-sm sm:h-14 sm:w-14">
                                     @if ($item->produk?->gambar)
-                                        <img src="{{ asset('storage/' . $item->produk->gambar) }}" alt="{{ $item->produk->nama_produk }}" class="h-full w-full object-cover">
+                                        <img src="{{ asset('images/produk/' . $item->produk->gambar) }}" alt="{{ $item->produk->nama_produk }}" class="h-full w-full object-cover">
                                     @else
                                         <div class="flex h-full items-center justify-center text-[10px] text-gray-500">Tanpa gambar</div>
                                     @endif

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProdukRequest;
 use App\Models\Kategori;
 use App\Models\Produk;
-use Illuminate\Support\Facades\Storage;
 
 class ProdukController extends Controller
 {
@@ -39,7 +38,16 @@ class ProdukController extends Controller
         $produk = $request->validated();
 
         if ($request->hasFile('produk_gambar')) {
-            $produk['gambar'] = $request->file('produk_gambar')->store('produk', 'public');
+            $file = $request->file('produk_gambar');
+            $fileName = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+            $destinationPath = public_path('images/produk');
+
+            if (! file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            $file->move($destinationPath, $fileName);
+            $produk['gambar'] = $fileName;
         }
 
         unset($produk['produk_gambar']);
@@ -77,11 +85,23 @@ class ProdukController extends Controller
         $produk = Produk::findOrFail($id);
 
         if ($request->hasFile('produk_gambar')) {
-            $produkData['gambar'] = $request->file('produk_gambar')->store('produk', 'public');
+            $file = $request->file('produk_gambar');
+            $fileName = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+            $destinationPath = public_path('images/produk');
 
-            // Hapus file gambar lama jika ada
-            if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
-                Storage::disk('public')->delete($produk->gambar);
+            if (! file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            $file->move($destinationPath, $fileName);
+            $produkData['gambar'] = $fileName;
+
+            // Hapus file gambar lama dari public/images/produk jika ada
+            if ($produk->gambar) {
+                $oldPath = public_path('images/produk/'.$produk->gambar);
+                if (file_exists($oldPath)) {
+                    @unlink($oldPath);
+                }
             }
         }
 
@@ -100,8 +120,11 @@ class ProdukController extends Controller
         $produk = Produk::find($id);
 
         if ($produk) {
-            if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
-                Storage::disk('public')->delete($produk->gambar);
+            if ($produk->gambar) {
+                $filePath = public_path('images/produk/'.$produk->gambar);
+                if (file_exists($filePath)) {
+                    @unlink($filePath);
+                }
             }
 
             $produk->delete();

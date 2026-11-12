@@ -128,7 +128,7 @@
                             {{-- Foto Saat Ini --}}
                             @if ($produk->gambar)
                                 <div class="flex items-center gap-3 p-2.5 rounded-2xl bg-gray-50 border border-gray-200 shrink-0">
-                                    <img src="{{ asset('storage/' . $produk->gambar) }}" alt="Gambar_{{ $produk->nama_produk }}" class="h-14 w-14 md:h-16 md:w-16 rounded-xl object-cover shadow-xs bg-[#e8e4d8]">
+                                    <img src="{{ asset('images/produk/' . $produk->gambar) }}" alt="Gambar_{{ $produk->nama_produk }}" class="h-14 w-14 md:h-16 md:w-16 rounded-xl object-cover shadow-xs bg-[#e8e4d8]">
                                     <div class="text-left">
                                         <p class="text-xs font-semibold text-gray-800">Foto Saat Ini</p>
                                         <p class="text-[10px] text-gray-500">Tersimpan di server</p>

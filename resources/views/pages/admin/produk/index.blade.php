@@ -222,7 +222,7 @@
                                     <div class="flex items-center gap-3">
                                         <div class="h-11 w-11 md:h-12 md:w-12 shrink-0 overflow-hidden rounded-xl bg-[#e8e4d8] shadow-xs">
                                             @if ($item->gambar)
-                                                <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->nama_produk }}" class="h-full w-full object-cover">
+                                                <img src="{{ asset('images/produk/' . $item->gambar) }}" alt="{{ $item->nama_produk }}" class="h-full w-full object-cover">
                                             @else
                                                 <div class="flex h-full items-center justify-center text-[9px] md:text-[10px] text-gray-500 font-medium">Tanpa foto</div>
                                             @endif
