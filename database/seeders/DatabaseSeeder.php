@@ -32,31 +32,31 @@ class DatabaseSeeder extends Seeder
             ],
         ]);
 
-        DB::table('tb_kategori')->insert([
-            [
-                'nama_kategori' => 'Makanan',
-            ],
-            [
-                'nama_kategori' => 'Minuman',
-            ],
-        ]);
+        // DB::table('tb_kategori')->insert([
+        //     [
+        //         'nama_kategori' => 'Makanan',
+        //     ],
+        //     [
+        //         'nama_kategori' => 'Minuman',
+        //     ],
+        // ]);
 
-        DB::table('tb_produk')->insert([
-            [
-                'nama_produk' => 'Matcha',
-                'harga' => '7000',
-                'stok' => '12',
-                'kategori_id' => 2,
-                'created_at' => now(),
-            ],
-            [
-                'nama_produk' => 'Kopi Susu',
-                'harga' => '12000',
-                'stok' => '23',
-                'kategori_id' => 1,
-                'created_at' => now(),
-            ],
-        ]);
+        // DB::table('tb_produk')->insert([
+        //     [
+        //         'nama_produk' => 'Matcha',
+        //         'harga' => '7000',
+        //         'stok' => '12',
+        //         'kategori_id' => 2,
+        //         'created_at' => now(),
+        //     ],
+        //     [
+        //         'nama_produk' => 'Kopi Susu',
+        //         'harga' => '12000',
+        //         'stok' => '23',
+        //         'kategori_id' => 1,
+        //         'created_at' => now(),
+        //     ],
+        // ]);
 
     }
 }

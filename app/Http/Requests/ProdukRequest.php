@@ -24,10 +24,10 @@ class ProdukRequest extends FormRequest
     {
         return [
             'nama_produk' => 'required|string|max:255',
-            'harga' => 'required|integer',
-            'stok' => 'required|integer',
-            'kategori_id' => 'required',
-            'produk_gambar' => 'nullable|image|mimes:jpeg,jpg,png',
+            'harga' => 'required|integer|min:0',
+            'stok' => 'required|integer|min:0',
+            'kategori_id' => 'required|exists:tb_kategori,id',
+            'produk_gambar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:4096',
         ];
     }
 }

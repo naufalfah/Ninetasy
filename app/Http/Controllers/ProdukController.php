@@ -73,19 +73,21 @@ class ProdukController extends Controller
      */
     public function update(ProdukRequest $request, string $id)
     {
-        $produk = $request->validated();
+        $produkData = $request->validated();
+        $produk = Produk::findOrFail($id);
 
         if ($request->hasFile('produk_gambar')) {
-            $produk['gambar'] = $request->file('produk_gambar')->store('produk', 'public');
+            $produkData['gambar'] = $request->file('produk_gambar')->store('produk', 'public');
 
-            if ($request->produk_gambar_lama) {
-                Storage::delete('public/'.$request->produk_gambar_lama);
+            // Hapus file gambar lama jika ada
+            if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
+                Storage::disk('public')->delete($produk->gambar);
             }
         }
 
-        unset($produk['produk_gambar']);
+        unset($produkData['produk_gambar']);
 
-        Produk::where('id', $id)->update($produk);
+        $produk->update($produkData);
 
         return redirect(route('admin.produk.index'))->with('pesan', 'Data telah diperbarui');
     }
@@ -97,11 +99,13 @@ class ProdukController extends Controller
     {
         $produk = Produk::find($id);
 
-        if ($produk->gambar && Storage::exists('public/'.$produk->gambar)) {
-            Storage::delete('public/'.$produk->gambar);
-        }
+        if ($produk) {
+            if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
+                Storage::disk('public')->delete($produk->gambar);
+            }
 
-        Produk::where('id', $id)->delete();
+            $produk->delete();
+        }
 
         return redirect(route('admin.produk.index'))->with('pesan', 'Produk berhasil dihapus!');
     }
