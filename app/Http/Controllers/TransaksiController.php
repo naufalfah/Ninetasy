@@ -34,7 +34,7 @@ class TransaksiController extends Controller
         $produkQuery = Produk::join('tb_kategori', 'tb_produk.kategori_id', 'tb_kategori.id')
             ->select('tb_produk.*', 'tb_kategori.nama_kategori')
             ->when($search !== '', function ($query) use ($search) {
-                $query->where('tb_produk.nama_produk', 'like', '%' . $search . '%');
+                $query->where('tb_produk.nama_produk', 'like', '%'.$search.'%');
             })
             ->when($kategoriId, function ($query) use ($kategoriId) {
                 $query->where('tb_produk.kategori_id', $kategoriId);
@@ -49,6 +49,18 @@ class TransaksiController extends Controller
         // Parameter ke-1 ('keranjang'): nama key yang dicari di dalam session.
         // Parameter ke-2 ([]): nilai default (array kosong) yang akan dipakai jika session 'keranjang' belum pernah dibuat / masih kosong.
         $keranjang = session()->get('keranjang', []);
+
+        // Sinkronisasi foto produk untuk thumbnail keranjang tanpa membebani session cookie (mencegah Header Overflow di Vercel)
+        if (! empty($keranjang)) {
+            $keranjangProdukIds = array_keys($keranjang);
+            $keranjangProduks = Produk::whereIn('id', $keranjangProdukIds)->get()->keyBy('id');
+            foreach ($keranjang as $kId => &$item) {
+                if (isset($keranjangProduks[$kId])) {
+                    $item['gambar_url'] = $keranjangProduks[$kId]->gambar_url;
+                }
+            }
+            unset($item);
+        }
 
         // Menginisialisasi variabel $total belanja awal dengan nilai 0
         $total = 0;
@@ -99,7 +111,6 @@ class TransaksiController extends Controller
                 'id' => $produk->id,                     // Menyimpan ID produk
                 'nama_produk' => $produk->nama_produk, // Menyimpan nama produk
                 'harga' => $produk->harga,               // Menyimpan harga satuan produk
-                'gambar' => $produk->gambar,             // Menyimpan path gambar untuk thumbnail keranjang
                 'qty' => 1,                                // Mengatur kuantitas (qty) awal sebanyak 1
                 'subtotal' => $produk->harga,            // Mengatur subtotal awal sama dengan harga satuan (1 x harga)
             ];
@@ -276,7 +287,7 @@ class TransaksiController extends Controller
                     if ($produk->stok < $item['qty']) {
                         // Melempar error/exception agar transaksi di-rollback dan memunculkan pesan stok tidak cukup
                         throw new \Exception(
-                            'Stok ' . $produk->nama_produk . ' tidak mencukupi!'
+                            'Stok '.$produk->nama_produk.' tidak mencukupi!'
                         );
                     }
 
@@ -330,7 +341,7 @@ class TransaksiController extends Controller
 
         $transaksi = Transaksi::query()
             ->when($search !== '', function ($query) use ($search) {
-                $query->where('id', 'like', '%' . $search . '%');
+                $query->where('id', 'like', '%'.$search.'%');
             })
             ->latest()
             ->paginate(15)

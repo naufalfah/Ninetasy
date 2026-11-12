@@ -99,7 +99,9 @@
                         @foreach ($keranjang as $item)
                             <div class="flex items-center gap-3 py-4">
                                 <div class="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-stone-100">
-                                    @if (!empty($item['gambar']))
+                                    @if (!empty($item['gambar_url']))
+                                        <img src="{{ $item['gambar_url'] }}" class="h-full w-full object-cover" alt="{{ $item['nama_produk'] }}">
+                                    @elseif (!empty($item['gambar']))
                                         <img src="{{ str_starts_with($item['gambar'], 'data:') || str_starts_with($item['gambar'], 'http') ? $item['gambar'] : asset('images/produk/' . $item['gambar']) }}" class="h-full w-full object-cover" alt="{{ $item['nama_produk'] }}">
                                     @else
                                         <div class="flex h-full items-center justify-center text-[10px] text-gray-400">Produk</div>
