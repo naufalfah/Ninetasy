@@ -18,7 +18,7 @@
             <p class="mt-1 text-xs md:text-sm text-gray-500">Kelola katalog produk, ketersediaan stok, harga, dan foto produk toko</p>
         </div>
 
-        {{-- Alert Notifikasi Pesan --}}
+        {{-- Alert Notifikasi Pesan Sukses --}}
         @if (session('pesan'))
             <div class="mb-5 md:mb-6 flex items-center justify-between gap-3 rounded-2xl bg-white p-3.5 md:p-4 shadow-sm ring-1 ring-black/5 border-l-4 border-emerald-500">
                 <div class="flex items-center gap-3">
@@ -29,6 +29,47 @@
                     </div>
                     <p class="text-xs md:text-sm font-medium text-gray-800">{{ session('pesan') }}</p>
                 </div>
+            </div>
+        @endif
+
+        {{-- Alert Notifikasi Error Validasi --}}
+        @if ($errors->any())
+            <div class="mb-5 md:mb-6 rounded-2xl bg-red-50 p-3.5 md:p-4 border-l-4 border-red-500 shadow-sm ring-1 ring-red-200">
+                <div class="flex items-start gap-3">
+                    <div class="w-7 h-7 md:w-8 md:h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0 mt-0.5">
+                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs md:text-sm font-bold text-red-800">Gagal menyimpan produk:</p>
+                        <ul class="mt-1 list-disc list-inside text-xs text-red-700 space-y-0.5">
+                            @foreach ($errors->all() as $err)
+                                <li>{{ $err }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Peringatan Jika Kategori Masih Kosong --}}
+        @if ($kategori->isEmpty())
+            <div class="mb-5 md:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-amber-50 p-4 border border-amber-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs md:text-sm font-semibold text-amber-900">Belum Ada Kategori</p>
+                        <p class="text-xs text-amber-700">Setiap produk wajib memiliki kategori. Silakan buat minimal satu kategori terlebih dahulu.</p>
+                    </div>
+                </div>
+                <a href="{{ route('admin.kategori.index') }}" class="inline-flex items-center justify-center rounded-xl bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2 text-xs font-semibold shrink-0 transition">
+                    + Tambah Kategori
+                </a>
             </div>
         @endif
 

@@ -12,6 +12,27 @@
             </a>
         </div>
 
+        {{-- Alert Notifikasi Error Validasi --}}
+        @if ($errors->any())
+            <div class="mb-5 md:mb-6 rounded-2xl bg-red-50 p-3.5 md:p-4 border-l-4 border-red-500 shadow-sm ring-1 ring-red-200">
+                <div class="flex items-start gap-3">
+                    <div class="w-7 h-7 md:w-8 md:h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0 mt-0.5">
+                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs md:text-sm font-bold text-red-800">Gagal memperbarui produk:</p>
+                        <ul class="mt-1 list-disc list-inside text-xs text-red-700 space-y-0.5">
+                            @foreach ($errors->all() as $err)
+                                <li>{{ $err }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- Card Form Edit Produk --}}
         <div class="rounded-3xl bg-white p-5 md:p-6 lg:p-8 shadow-sm ring-1 ring-black/5">
             <div class="mb-5 md:mb-6">
