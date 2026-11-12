@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nama_produk');
             $table->bigInteger('harga');
             $table->integer('stok')->default(0);
+            $table->foreignId('kategori_id')->constrained('tb_kategori');
             $table->timestamps();
         });
     }

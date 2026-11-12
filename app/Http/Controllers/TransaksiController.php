@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 // Mengimpor model DetailTransaksi untuk berinteraksi dengan tabel 'tb_detail_transaksi' di database
 use App\Models\DetailTransaksi;
+use App\Models\Kategori;
 // Mengimpor model Produk untuk berinteraksi dengan tabel 'tb_produk' di database
 use App\Models\Produk;
 // Mengimpor model Transaksi untuk berinteraksi dengan tabel 'tb_transaksi' di database
@@ -21,10 +22,27 @@ class TransaksiController extends Controller
     /**
      * Menampilkan halaman utama transaksi: daftar produk dan keranjang belanja saat ini.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Mengambil semua data produk yang tersedia di database dari tabel 'tb_produk'
-        $produk = Produk::all();
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'kategori_id' => ['nullable', 'integer', 'exists:tb_kategori,id'],
+        ]);
+        $search = trim($filters['search'] ?? '');
+        $kategoriId = $filters['kategori_id'] ?? null;
+
+        $produkQuery = Produk::join('tb_kategori', 'tb_produk.kategori_id', 'tb_kategori.id')
+            ->select('tb_produk.*', 'tb_kategori.nama_kategori')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where('tb_produk.nama_produk', 'like', '%' . $search . '%');
+            })
+            ->when($kategoriId, function ($query) use ($kategoriId) {
+                $query->where('tb_produk.kategori_id', $kategoriId);
+            })
+            ->orderBy('tb_produk.id');
+
+        $produk = $produkQuery->get();
+        $kategori = Kategori::orderBy('nama_kategori')->get();
 
         // Mengambil data keranjang belanja dari SESSION dengan key 'keranjang'
         // session()->get('keranjang', []):
@@ -42,7 +60,7 @@ class TransaksiController extends Controller
         }
 
         // Menampilkan view 'pages.user.transaksi.index' sambil mengirimkan data $produk, $keranjang, dan $total menggunakan compact()
-        return view('pages.user.transaksi.index', compact('produk', 'keranjang', 'total'));
+        return view('pages.user.transaksi.index', compact('produk', 'keranjang', 'total', 'kategori', 'search', 'kategoriId'));
     }
 
     /**
@@ -81,6 +99,7 @@ class TransaksiController extends Controller
                 'id' => $produk->id,                     // Menyimpan ID produk
                 'nama_produk' => $produk->nama_produk, // Menyimpan nama produk
                 'harga' => $produk->harga,               // Menyimpan harga satuan produk
+                'gambar' => $produk->gambar,             // Menyimpan path gambar untuk thumbnail keranjang
                 'qty' => 1,                                // Mengatur kuantitas (qty) awal sebanyak 1
                 'subtotal' => $produk->harga,            // Mengatur subtotal awal sama dengan harga satuan (1 x harga)
             ];
@@ -136,7 +155,7 @@ class TransaksiController extends Controller
         $keranjang = session()->get('keranjang', []);
 
         // Mengecek jika produk dengan ID ini tidak ada di keranjang
-        if (!isset($keranjang[$id])) {
+        if (! isset($keranjang[$id])) {
             // Langsung kembalikan ke halaman sebelumnya
             return back();
         }
@@ -257,7 +276,7 @@ class TransaksiController extends Controller
                     if ($produk->stok < $item['qty']) {
                         // Melempar error/exception agar transaksi di-rollback dan memunculkan pesan stok tidak cukup
                         throw new \Exception(
-                            'Stok '.$produk->nama_produk.' tidak mencukupi!'
+                            'Stok ' . $produk->nama_produk . ' tidak mencukupi!'
                         );
                     }
 
@@ -295,25 +314,29 @@ class TransaksiController extends Controller
 
         // Mengalihkan (redirect) pengguna ke halaman daftar transaksi dengan membawa flash message sukses
         return redirect()
-            ->route('transaksi.index')
+            ->route('user.transaksi.index')
             ->with('pesan', 'Transaksi berhasil disimpan!');
     }
 
     /**
      * Menampilkan daftar riwayat seluruh transaksi yang tersimpan di database.
      */
-    public function riwayat()
+    public function riwayat(Request $request)
     {
-        // Mengambil semua data transaksi dari tabel 'tb_transaksi'
-        // with('detailTransaksi.produk'): melakukan Eager Loading untuk memuat relasi detail transaksi dan produk sekaligus
-        // latest(): mengurutkan dari data yang paling baru dibuat
-        // get(): mengeksekusi query dan mengembalikan hasilnya dalam bentuk Collection
-        $transaksi = Transaksi::with('detailTransaksi.produk')
-            ->latest()
-            ->get();
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+        $search = trim($filters['search'] ?? '');
 
-        // Mengirimkan data transaksi ke view 'pages.user.transaksi.riwayat'
-        return view('pages.user.transaksi.riwayat', compact('transaksi'));
+        $transaksi = Transaksi::query()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where('id', 'like', '%' . $search . '%');
+            })
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('pages.user.transaksi.riwayat', compact('transaksi', 'search'));
     }
 
     /**
